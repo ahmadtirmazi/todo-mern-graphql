@@ -50,44 +50,68 @@ function App() {
   return (
     <div style={{ display: "flex" }}>
       <div style={{ margin: "auto", width: 400 }}>
-        <List>
-          {data.list.map(({ id, text, isComplete }) => {
-            const labelId = `checkbox-list-label-${id}`;
-            return (
-              <ListItem
-                key={id}
-                role={undefined}
-                dense
-                button
-                onClick={() => {
-                  update({ variables: { id, isComplete: !isComplete } });
-                }}
-              >
-                <ListItemIcon>
-                  <Checkbox
-                    edge="start"
-                    checked={isComplete}
-                    tabIndex={-1}
-                    disableRipple
-                    inputProps={{ "aria-labelledby": labelId }}
-                  />
-                </ListItemIcon>
-                <ListItemText id={labelId} primary={text} />
-                <ListItemSecondaryAction>
-                  <IconButton
-                    edge="end"
-                    aria-label="delete"
-                    onClick={() => {
-                      remove({ variables: { id } });
-                    }}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </ListItemSecondaryAction>
-              </ListItem>
-            );
-          })}
-        </List>
+        <Paper elevation={1}>
+          <List>
+            {data.list.map(todoItem => {
+              let { id, text, isComplete } = todoItem;
+              const labelId = `checkbox-list-label-${id}`;
+              return (
+                <ListItem
+                  key={id}
+                  role={undefined}
+                  dense
+                  button
+                  onClick={() => {
+                    update({
+                      variables: { id, isComplete: !isComplete },
+                      update: store => {
+                        // Read the data from our cache for this query.
+                        const data = store.readQuery({
+                          query: LIST_TODO_ITEMS
+                        });
+                        // Add our comment from the mutation to the end.
+                        data.list = data.list.map(e =>
+                          e.id === id
+                            ? {
+                                ...todoItem,
+                                isComplete: !isComplete
+                              }
+                            : e
+                        );
+
+                        console.log(data);
+                        // Write our data back to the cache.
+                        store.writeQuery({ query: LIST_TODO_ITEMS, data });
+                      }
+                    });
+                  }}
+                >
+                  <ListItemIcon>
+                    <Checkbox
+                      edge="start"
+                      checked={isComplete}
+                      tabIndex={-1}
+                      disableRipple
+                      inputProps={{ "aria-labelledby": labelId }}
+                    />
+                  </ListItemIcon>
+                  <ListItemText id={labelId} primary={text} />
+                  <ListItemSecondaryAction>
+                    <IconButton
+                      edge="end"
+                      aria-label="delete"
+                      onClick={() => {
+                        remove({ variables: { id } });
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              );
+            })}
+          </List>
+        </Paper>
       </div>
     </div>
   );

@@ -5,7 +5,7 @@ mongoose.connect("mongodb://localhost/todo", { useNewUrlParser: true });
 
 const typeDefs = `
   type Query {
-    hello(name: String): String!
+    list: [Todo]
   }
   type Todo {
     id: ID!
@@ -14,18 +14,28 @@ const typeDefs = `
   }
   type Mutation {
     createTodo(text: String!): Todo
+    update(id: ID!, isComplete: Boolean!): Boolean
+    remove(id: ID!): Boolean
   }
 `;
 
 const resolvers = {
   Query: {
-    hello: (_, { name }) => `Hello ${name || "World"}`
+    list: () => Todo.find()
   },
   Mutation: {
-    createTodo: (_, { text }) => {
+    createTodo: async (_, { text }) => {
       const todo = new Todo({ text, isComplete: false });
-      todo.save();
+      await todo.save();
       return todo;
+    },
+    update: async (_, { id, isComplete }) => {
+      await Todo.findByIdAndUpdate(id, { isComplete });
+      return true;
+    },
+    remove: async (_, { id }) => {
+      await Todo.findByIdAndRemove(id);
+      return true;
     }
   }
 };

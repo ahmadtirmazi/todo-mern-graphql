@@ -1,24 +1,38 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import "./App.css";
+
+import { gql } from "apollo-boost";
+import { useQuery } from "@apollo/react-hooks";
+
+import Paper from "@material-ui/core/Paper";
+
+const LIST_TODO_ITEMS = gql`
+  {
+    list {
+      id
+      text
+      isComplete
+    }
+  }
+`;
 
 function App() {
+  const { loading, error, data } = useQuery(LIST_TODO_ITEMS);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>;
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div style={{ display: "flex" }}>
+      <div style={{ margin: "auto", width: 400 }}>
+        <Paper elevation={1}>
+          {data.list.map(({ id, text, isComplete }) => (
+            <div key={`${id}-todo-item`}>
+              {text} ({isComplete ? "Done" : "Pending"})
+            </div>
+          ))}
+        </Paper>
+      </div>
     </div>
   );
 }

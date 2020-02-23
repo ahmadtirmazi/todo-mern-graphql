@@ -1,2 +1,2 @@
 # todo-mern-graphql
-A small ToDo application using NodeJS, ReactJS, MongoDB, GraphQL
+A small ToDo application using NodeJS, ReactJS, MongoDB, GraphQL, Apollo
